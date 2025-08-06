@@ -10,11 +10,15 @@ export default function Home() {
     const [actions, setActions] = useState<any[]>([])
     const [isPlaying, setIsPlaying] = useState(false)
     const [currentStep, setCurrentStep] = useState(0)
+    const [speed, setSpeed] = useState(100) // milliseconds between steps
+    const [arraySize, setArraySize] = useState(50) // number of elements
+    const [sortDirection, setSortDirection] = useState('asc') // 'asc' or 'desc'
     
     // Use ref to store interval so we can clear it
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-    const handleLoadAlgorithm = async (algorithmName: string) => {
+    const handleLoadAlgorithm = async (algorithmName: string, customArraySize?: number) => {
+        const sizeToUse = customArraySize ?? arraySize
         console.log('Loading algorithm:', algorithmName)
         
         // Reset animation state when loading new algorithm
@@ -26,12 +30,14 @@ export default function Home() {
         }
         
         try {
-            const baseURL = process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000' : 'domain.com';
-
-            const response = await fetch(`${baseURL}/api/algorithm/${algorithmName}`, {
+            // Call our Next.js API route which will proxy to the Python backend
+            const response = await fetch(`/api/algorithm/${algorithmName}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
+                body: JSON.stringify({ 
+                    array_size: sizeToUse,
+                    sort_direction: sortDirection 
+                })
             });
             
             if (!response.ok) {
@@ -78,9 +84,11 @@ export default function Home() {
             return
         }
         
-        if (currentStep >= actions.length - 1) {
-            console.log('Animation finished. Use Reset to start over.')
-            return
+        if (currentStep >= actions.length) {
+            console.log('Animation finished. Restarting from beginning.')
+            // Reset to beginning and start playing
+            setCurrentStep(0)
+            setWorkingArray([...inputArray]) // Reset to original array
         }
         
         setIsPlaying(true)
@@ -96,7 +104,7 @@ export default function Home() {
                         clearInterval(intervalRef.current)
                         intervalRef.current = null
                     }
-                    return prev
+                    return actions.length // Set to exact length when finished
                 }
                 
                 // Apply the current action to the working array
@@ -112,11 +120,20 @@ export default function Home() {
                         newArray[pos2] = temp
                         return newArray
                     })
+                } else if (currentAction && currentAction.type === 'set') {
+                    setWorkingArray(prevArray => {
+                        const newArray = [...prevArray]
+                        const position = currentAction.positions[0]
+                        const newValue = currentAction.values[0]
+                        // Set the element directly
+                        newArray[position] = newValue
+                        return newArray
+                    })
                 }
                 
                 return nextStep
             })
-        }, 100)
+        }, speed)
     }
 
     const handlePause = () => {
@@ -148,9 +165,56 @@ export default function Home() {
         console.log('New Array clicked')
         if (algorithm) {
             // Reload the same algorithm with a new random array
-            handleLoadAlgorithm(algorithm)
+            handleLoadAlgorithm(algorithm, arraySize)
         }
     }
+
+    // Helper function to get algorithm display name
+    const getAlgorithmDisplayName = (algoName: string) => {
+        const nameMap: { [key: string]: string } = {
+            'bubble': 'Bubble Sort',
+            'selection': 'Selection Sort',
+            'insertion': 'Insertion Sort',
+            'quick': 'Quick Sort',
+            'merge': 'Merge Sort'
+        }
+        return nameMap[algoName] || algoName
+    }
+
+    // Helper function to get current status
+    const getCurrentStatus = () => {
+        if (isPlaying) return 'Playing'
+        if (currentStep >= actions.length && actions.length > 0) return 'Ready to Replay'
+        if (currentStep > 0) return 'Paused'
+        return 'Ready'
+    }
+
+    const handleSpeedChange = (newSpeed: number) => {
+        setSpeed(newSpeed)
+        // If currently playing, restart with new speed
+        if (isPlaying && intervalRef.current) {
+            clearInterval(intervalRef.current)
+            intervalRef.current = null
+            // Restart playing with new speed
+            setTimeout(() => handlePlay(), 50)
+        }
+    }
+
+    const handleArraySizeChange = (newSize: number) => {
+        setArraySize(newSize)
+        // If an algorithm is loaded, reload it with new size
+        if (algorithm) {
+            handleLoadAlgorithm(algorithm, newSize)
+        }
+    }
+
+    // Auto-reload algorithm when sort direction changes
+    useEffect(() => {
+        if (algorithm) {
+            // Only reload if we have an algorithm loaded
+            handleLoadAlgorithm(algorithm, arraySize)
+        }
+    }, [sortDirection])
 
     // Cleanup interval on unmount
     useEffect(() => {
@@ -177,13 +241,20 @@ export default function Home() {
                     onNewArray={handleNewArray}
                     isPlaying={isPlaying}
                     currentAlgorithm={algorithm}
+                    speed={speed}
+                    onSpeedChange={handleSpeedChange}
+                    arraySize={arraySize}
+                    onArraySizeChange={handleArraySizeChange}
+                    sortDirection={sortDirection}
+                    onSortDirectionChange={setSortDirection}
                 />
 
                 <div className="canvas-container">
                     <Canvas 
                         array={workingArray} 
                         actions={actions} 
-                        currentStep={currentStep} 
+                        currentStep={currentStep}
+                        originalMaxValue={inputArray.length > 0 ? Math.max(...inputArray) : 100}
                     />
                 </div>
                 
@@ -191,17 +262,17 @@ export default function Home() {
                 <div className="status-info">
                     <span className="status-item">
                         <span className="label">Algorithm:</span> 
-                        <span className="value">{algorithm || 'None'}</span>
+                        <span className="value">{algorithm ? getAlgorithmDisplayName(algorithm) : 'None'}</span>
                     </span>
                     <span className="status-item">
                         <span className="label">Step:</span> 
-                        <span className="value">{currentStep}</span> / 
+                        <span className="value">{Math.min(currentStep, actions.length)}</span> / 
                         <span className="value">{actions.length}</span>
                     </span>
                     <span className="status-item">
                         <span className="label">Status:</span> 
-                        <span className={`value ${isPlaying ? 'playing' : 'paused'}`}>
-                            {isPlaying ? 'Playing' : 'Paused'}
+                        <span className={`value ${getCurrentStatus().toLowerCase().replace(/\s+/g, '')}`}>
+                            {getCurrentStatus()}
                         </span>
                     </span>
                 </div>
@@ -293,6 +364,18 @@ export default function Home() {
                 
                 .value.paused {
                     color: var(--text-secondary);
+                }
+                
+                .value.finished {
+                    color: var(--accent-primary);
+                }
+                
+                .value.ready {
+                    color: var(--text-muted);
+                }
+                
+                .value.readytoreplay {
+                    color: var(--accent-success);
                 }
                 
                 @media (max-width: 768px) {

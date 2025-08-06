@@ -4,9 +4,10 @@ interface CanvasProps {
     array: number[]
     actions: any[]
     currentStep: number
+    originalMaxValue: number
 }
 
-export default function Canvas({ array, actions, currentStep }: CanvasProps) {
+export default function Canvas({ array, actions, currentStep, originalMaxValue }: CanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     const drawArray = () => {
@@ -39,18 +40,21 @@ export default function Canvas({ array, actions, currentStep }: CanvasProps) {
         const availableWidth = rect.width - (padding * 2)
         const barWidth = (availableWidth - (array.length - 1) * barSpacing) / array.length
         const maxHeight = rect.height - padding * 2
-        const maxValue = Math.max(...array)
+        const maxValue = originalMaxValue  // Use fixed max value to prevent graph resizing
 
         // Get current action for highlighting
         const currentAction = actions[currentStep]
         let comparePositions: number[] = []
         let swapPositions: number[] = []
+        let setPositions: number[] = []
 
         if (currentAction) {
             if (currentAction.type === 'compare') {
                 comparePositions = currentAction.positions || []
             } else if (currentAction.type === 'swap') {
                 swapPositions = currentAction.positions || []
+            } else if (currentAction.type === 'set') {
+                setPositions = currentAction.positions || []
             }
         }
 
@@ -73,6 +77,11 @@ export default function Canvas({ array, actions, currentStep }: CanvasProps) {
                 gradient = ctx.createLinearGradient(x, y, x, y + barHeight)
                 gradient.addColorStop(0, '#fb8500')
                 gradient.addColorStop(1, '#d29922')
+            } else if (setPositions.includes(index)) {
+                // Purple gradient for set/merge placement
+                gradient = ctx.createLinearGradient(x, y, x, y + barHeight)
+                gradient.addColorStop(0, '#a855f7')
+                gradient.addColorStop(1, '#7c3aed')
             } else {
                 // Default blue gradient
                 gradient = ctx.createLinearGradient(x, y, x, y + barHeight)
@@ -100,22 +109,6 @@ export default function Canvas({ array, actions, currentStep }: CanvasProps) {
             ctx.lineWidth = 1
             ctx.stroke()
 
-            // Draw value text if there's enough space
-            if (barWidth > 20 && barHeight > 20) {
-                ctx.fillStyle = '#f0f6fc'
-                ctx.font = `bold ${Math.min(12, barWidth / 4)}px JetBrains Mono, monospace`
-                ctx.textAlign = 'center'
-                ctx.textBaseline = 'middle'
-                
-                // Add text shadow for better readability
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'
-                ctx.shadowBlur = 2
-                ctx.fillText(value.toString(), x + barWidth / 2, y + barHeight / 2)
-                
-                // Reset shadow
-                ctx.shadowColor = 'transparent'
-                ctx.shadowBlur = 0
-            }
         })
 
         // Draw grid lines for better visual reference

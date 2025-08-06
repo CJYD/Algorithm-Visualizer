@@ -1,11 +1,19 @@
+import Slider from './Slider'
+
 interface ControlPanelProps {
-    onLoadAlgorithm: (algorithmName: string) => void;
+    onLoadAlgorithm: (algorithmName: string, arraySize?: number) => void;
     onPlay: () => void;
     onPause: () => void;
     onReset: () => void;
     onNewArray: () => void;
     isPlaying: boolean;
     currentAlgorithm: string;
+    speed: number;
+    onSpeedChange: (speed: number) => void;
+    arraySize: number;
+    onArraySizeChange: (size: number) => void;
+    sortDirection: string;
+    onSortDirectionChange: (direction: string) => void;
 }
 
 export default function ControlPanel({
@@ -15,26 +23,72 @@ export default function ControlPanel({
     onReset,
     onNewArray,
     isPlaying,
-    currentAlgorithm
+    currentAlgorithm,
+    speed,
+    onSpeedChange,
+    arraySize,
+    onArraySizeChange,
+    sortDirection,
+    onSortDirectionChange
 }: ControlPanelProps) {
     return (
         <div className="control-panel">
-            <div className="algorithm-section">
-                <label className="section-label">Algorithm Selection</label>
-                <select 
-                    onChange={(e) => onLoadAlgorithm(e.target.value)}
-                    className="algorithm-select"
-                    value={currentAlgorithm}
-                >
-                    <option value="">Choose an algorithm...</option>
-                    <option value="bubble">Bubble Sort</option>
-                    <option value="quick">Quick Sort (coming soon)</option>
-                    <option value="merge">Merge Sort (coming soon)</option>
-                </select>
+            <div className="top-row">
+                <div className="algorithm-section">
+                    <label className="section-label">Algorithm</label>
+                    <select 
+                        onChange={(e) => onLoadAlgorithm(e.target.value, arraySize)}
+                        className="algorithm-select"
+                        value={currentAlgorithm}
+                    >
+                        <option value="">Choose algorithm...</option>
+                        <option value="bubble">Bubble Sort</option>
+                        <option value="insertion">Insertion Sort</option>
+                        <option value="merge">Merge Sort</option>
+                        <option value="quick">Quick Sort</option>
+                        <option value="selection">Selection Sort</option>
+                    </select>
+                </div>
+
+                <div className="algorithm-section">
+                    <label className="section-label">Direction</label>
+                    <select 
+                        onChange={(e) => onSortDirectionChange(e.target.value)}
+                        className="algorithm-select"
+                        value={sortDirection}
+                        disabled={isPlaying}
+                    >
+                        <option value="asc">Ascending ↑</option>
+                        <option value="desc">Descending ↓</option>
+                    </select>
+                </div>
+
+                <div className="slider-section">
+                    <Slider
+                        label="Array Size"
+                        value={arraySize}
+                        min={5}
+                        max={100}
+                        onChange={onArraySizeChange}
+                        disabled={isPlaying}
+                    />
+                </div>
+
+                <div className="slider-section">
+                    <Slider
+                        label="Speed"
+                        value={speed}
+                        min={10}
+                        max={1000}
+                        step={10}
+                        onChange={onSpeedChange}
+                        disabled={false}
+                        unit="ms"
+                    />
+                </div>
             </div>
 
             <div className="controls-section">
-                <label className="section-label">Playback Controls</label>
                 <div className="button-group">
                     <button 
                         onClick={onPlay} 
@@ -71,13 +125,32 @@ export default function ControlPanel({
                 .control-panel {
                     display: flex;
                     flex-direction: column;
+                    gap: 1.25rem;
+                }
+                
+                .top-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr 1fr;
                     gap: 1.5rem;
+                    align-items: center;
                 }
                 
                 .algorithm-section,
+                .slider-section {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+                
+                .algorithm-section {
+                    justify-content: center;
+                    padding-top: 0.125rem;
+                }
+                
                 .controls-section {
                     display: flex;
                     flex-direction: column;
+                    align-items: center;
                     gap: 0.75rem;
                 }
                 
@@ -87,16 +160,27 @@ export default function ControlPanel({
                     color: var(--text-secondary);
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
+                    height: 1.2em;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 0;
+                    text-align: center;
                 }
                 
                 .algorithm-select {
-                    padding: 12px 16px;
-                    font-size: 1rem;
+                    padding: 10px 16px;
+                    font-size: 0.875rem;
                     border-radius: var(--radius-sm);
                     background: var(--bg-tertiary);
                     border: 1px solid var(--border-primary);
                     color: var(--text-primary);
                     transition: all 0.2s ease;
+                    height: 38px;
+                    flex: 1;
+                    margin-top: 0.125rem;
+                    background-position: right 16px center;
+                    background-size: 10px;
                 }
                 
                 .algorithm-select:hover {
@@ -116,7 +200,7 @@ export default function ControlPanel({
                 }
                 
                 .control-button {
-                    padding: 12px 20px;
+                    padding: 10px 18px;
                     font-size: 0.875rem;
                     font-weight: 600;
                     border-radius: var(--radius-sm);
@@ -128,8 +212,9 @@ export default function ControlPanel({
                     display: flex;
                     align-items: center;
                     gap: 0.5rem;
-                    min-width: 100px;
+                    min-width: 90px;
                     justify-content: center;
+                    height: 38px;
                 }
                 
                 .control-button:hover:not(:disabled) {
@@ -173,6 +258,11 @@ export default function ControlPanel({
                 }
                 
                 @media (max-width: 768px) {
+                    .top-row {
+                        grid-template-columns: 1fr;
+                        gap: 1rem;
+                    }
+                    
                     .button-group {
                         display: grid;
                         grid-template-columns: 1fr 1fr;
@@ -183,6 +273,21 @@ export default function ControlPanel({
                         min-width: auto;
                         padding: 10px 16px;
                         font-size: 0.8rem;
+                    }
+                }
+                
+                @media (max-width: 1024px) and (min-width: 769px) {
+                    .top-row {
+                        grid-template-columns: 1fr 1fr;
+                        gap: 1rem;
+                    }
+                    
+                    .algorithm-section:first-child {
+                        grid-column: 1 / 2;
+                    }
+                    
+                    .algorithm-section:nth-child(2) {
+                        grid-column: 2 / 3;
                     }
                 }
             `}</style>
