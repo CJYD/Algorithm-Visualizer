@@ -34,8 +34,29 @@ export default function Home() {
                 body: JSON.stringify({})
             });
             
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            
             const data = await response.json()
             console.log('Got data from backend:', data)
+            
+            // Check if backend returned an error
+            if (data.error) {
+                console.error('Backend error:', data.error)
+                return
+            }
+
+            // Validate the response data
+            if (!data.input_array || !Array.isArray(data.input_array)) {
+                console.error('Invalid input_array received:', data.input_array)
+                return
+            }
+            
+            if (!data.actions || !Array.isArray(data.actions)) {
+                console.error('Invalid actions received:', data.actions)
+                return
+            }
 
             setAlgorithm(algorithmName)
             setInputArray(data.input_array)
@@ -111,7 +132,12 @@ export default function Home() {
         console.log('Reset clicked')
         setCurrentStep(0)
         setIsPlaying(false)
-        setWorkingArray([...inputArray]) // Reset to original array
+        
+        // Safely reset the working array
+        if (inputArray && Array.isArray(inputArray)) {
+            setWorkingArray([...inputArray]) // Reset to original array
+        }
+        
         if (intervalRef.current) {
             clearInterval(intervalRef.current)
             intervalRef.current = null
@@ -136,30 +162,159 @@ export default function Home() {
     }, [])
 
     return (
-        <div style={{ padding: '20px' }}>
-            <h1>Welcome to the Algorithm Visualizer</h1>
-            <ControlPanel
-                onLoadAlgorithm={handleLoadAlgorithm}
-                onPlay={handlePlay}
-                onPause={handlePause}
-                onReset={handleReset}
-                onNewArray={handleNewArray}
-                isPlaying={isPlaying}
-                currentAlgorithm={algorithm}
-            />
-
-            <div style={{ marginTop: '20px' }}>
-                <Canvas 
-                    array={workingArray} 
-                    actions={actions} 
-                    currentStep={currentStep} 
-                />
+        <div className="container">
+            <div className="header">
+                <h1 className="title">Algorithm Visualizer</h1>
+                <p className="subtitle">Interactive sorting algorithm visualization</p>
             </div>
             
-            {/* Debug info */}
-            <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-                Algorithm: {algorithm} | Step: {currentStep} of {actions.length} | Playing: {isPlaying ? 'Yes' : 'No'}
+            <div className="visualizer-card">
+                <ControlPanel
+                    onLoadAlgorithm={handleLoadAlgorithm}
+                    onPlay={handlePlay}
+                    onPause={handlePause}
+                    onReset={handleReset}
+                    onNewArray={handleNewArray}
+                    isPlaying={isPlaying}
+                    currentAlgorithm={algorithm}
+                />
+
+                <div className="canvas-container">
+                    <Canvas 
+                        array={workingArray} 
+                        actions={actions} 
+                        currentStep={currentStep} 
+                    />
+                </div>
+                
+                {/* Status info */}
+                <div className="status-info">
+                    <span className="status-item">
+                        <span className="label">Algorithm:</span> 
+                        <span className="value">{algorithm || 'None'}</span>
+                    </span>
+                    <span className="status-item">
+                        <span className="label">Step:</span> 
+                        <span className="value">{currentStep}</span> / 
+                        <span className="value">{actions.length}</span>
+                    </span>
+                    <span className="status-item">
+                        <span className="label">Status:</span> 
+                        <span className={`value ${isPlaying ? 'playing' : 'paused'}`}>
+                            {isPlaying ? 'Playing' : 'Paused'}
+                        </span>
+                    </span>
+                </div>
             </div>
+            
+            <style jsx>{`
+                .container {
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 2rem;
+                    gap: 2rem;
+                }
+                
+                .header {
+                    text-align: center;
+                    margin-bottom: 1rem;
+                }
+                
+                .title {
+                    font-size: 2.5rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    margin-bottom: 0.5rem;
+                    letter-spacing: -0.02em;
+                }
+                
+                .subtitle {
+                    font-size: 1rem;
+                    color: var(--text-secondary);
+                    font-weight: 400;
+                }
+                
+                .visualizer-card {
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--border-primary);
+                    border-radius: var(--radius);
+                    padding: 2rem;
+                    box-shadow: var(--shadow);
+                    max-width: 900px;
+                    width: 100%;
+                    backdrop-filter: blur(10px);
+                }
+                
+                .canvas-container {
+                    margin: 2rem 0;
+                    display: flex;
+                    justify-content: center;
+                    border-radius: var(--radius);
+                    overflow: hidden;
+                    background: var(--bg-tertiary);
+                    border: 1px solid var(--border-primary);
+                }
+                
+                .status-info {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem;
+                    background: var(--bg-tertiary);
+                    border-radius: var(--radius-sm);
+                    border: 1px solid var(--border-primary);
+                    font-size: 0.875rem;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                }
+                
+                .status-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                
+                .label {
+                    color: var(--text-secondary);
+                    font-weight: 500;
+                }
+                
+                .value {
+                    color: var(--text-primary);
+                    font-weight: 600;
+                }
+                
+                .value.playing {
+                    color: var(--accent-success);
+                }
+                
+                .value.paused {
+                    color: var(--text-secondary);
+                }
+                
+                @media (max-width: 768px) {
+                    .container {
+                        padding: 1rem;
+                    }
+                    
+                    .title {
+                        font-size: 2rem;
+                    }
+                    
+                    .visualizer-card {
+                        padding: 1.5rem;
+                    }
+                    
+                    .status-info {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 0.5rem;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

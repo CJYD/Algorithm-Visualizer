@@ -16,14 +16,29 @@ export default function Canvas({ array, actions, currentStep }: CanvasProps) {
         const ctx = canvas.getContext('2d')
         if (!ctx) return
 
-        // Clear the canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        // Set high DPI for crisp rendering
+        const dpr = window.devicePixelRatio || 1
+        const rect = canvas.getBoundingClientRect()
+        
+        canvas.width = rect.width * dpr
+        canvas.height = rect.height * dpr
+        ctx.scale(dpr, dpr)
+        
+        canvas.style.width = rect.width + 'px'
+        canvas.style.height = rect.height + 'px'
+
+        // Clear with dark background
+        ctx.fillStyle = '#0d1117'
+        ctx.fillRect(0, 0, rect.width, rect.height)
 
         if (array.length === 0) return
 
-        // Calculate bar dimensions
-        const barWidth = canvas.width / array.length
-        const maxHeight = canvas.height - 50  // Leave space for labels
+        // Calculate bar dimensions with better spacing
+        const padding = 40
+        const barSpacing = 2
+        const availableWidth = rect.width - (padding * 2)
+        const barWidth = (availableWidth - (array.length - 1) * barSpacing) / array.length
+        const maxHeight = rect.height - padding * 2
         const maxValue = Math.max(...array)
 
         // Get current action for highlighting
@@ -39,43 +54,131 @@ export default function Canvas({ array, actions, currentStep }: CanvasProps) {
             }
         }
 
-        // Draw each bar
+        // Draw each bar with modern styling
         array.forEach((value, index) => {
             const barHeight = (value / maxValue) * maxHeight
-            const x = index * barWidth
-            const y = canvas.height - barHeight
+            const x = padding + index * (barWidth + barSpacing)
+            const y = rect.height - padding - barHeight
 
-            // Determine bar color based on current action
-            let color = '#3498db'  // Default blue
+            // Determine colors based on current action
+            let gradient: CanvasGradient
+            
             if (comparePositions.includes(index)) {
-                color = '#e74c3c'  // Red for comparison
+                // Red gradient for comparison
+                gradient = ctx.createLinearGradient(x, y, x, y + barHeight)
+                gradient.addColorStop(0, '#f85149')
+                gradient.addColorStop(1, '#da3633')
             } else if (swapPositions.includes(index)) {
-                color = '#f39c12'  // Orange for swap
+                // Orange gradient for swap
+                gradient = ctx.createLinearGradient(x, y, x, y + barHeight)
+                gradient.addColorStop(0, '#fb8500')
+                gradient.addColorStop(1, '#d29922')
+            } else {
+                // Default blue gradient
+                gradient = ctx.createLinearGradient(x, y, x, y + barHeight)
+                gradient.addColorStop(0, '#58a6ff')
+                gradient.addColorStop(1, '#1f6feb')
             }
 
-            ctx.fillStyle = color
-            ctx.fillRect(x, y, barWidth - 2, barHeight)
+            // Draw bar with rounded corners effect
+            ctx.fillStyle = gradient
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
+            ctx.shadowBlur = 8
+            ctx.shadowOffsetY = 2
+            
+            ctx.beginPath()
+            ctx.roundRect(x, y, barWidth, barHeight, [4, 4, 0, 0])
+            ctx.fill()
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent'
+            ctx.shadowBlur = 0
+            ctx.shadowOffsetY = 0
 
-            // Draw the value on top of each bar (only if bars aren't too narrow)
-            if (barWidth > 15) {
-                ctx.fillStyle = '#000'
-                ctx.font = '10px Arial'
+            // Draw border
+            ctx.strokeStyle = '#30363d'
+            ctx.lineWidth = 1
+            ctx.stroke()
+
+            // Draw value text if there's enough space
+            if (barWidth > 20 && barHeight > 20) {
+                ctx.fillStyle = '#f0f6fc'
+                ctx.font = `bold ${Math.min(12, barWidth / 4)}px JetBrains Mono, monospace`
                 ctx.textAlign = 'center'
-                ctx.fillText(value.toString(), x + barWidth / 2, y - 5)
+                ctx.textBaseline = 'middle'
+                
+                // Add text shadow for better readability
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'
+                ctx.shadowBlur = 2
+                ctx.fillText(value.toString(), x + barWidth / 2, y + barHeight / 2)
+                
+                // Reset shadow
+                ctx.shadowColor = 'transparent'
+                ctx.shadowBlur = 0
             }
         })
+
+        // Draw grid lines for better visual reference
+        ctx.strokeStyle = '#21262d'
+        ctx.lineWidth = 1
+        ctx.setLineDash([2, 2])
+        
+        // Horizontal grid lines
+        for (let i = 1; i <= 4; i++) {
+            const y = rect.height - padding - (maxHeight / 4) * i
+            ctx.beginPath()
+            ctx.moveTo(padding, y)
+            ctx.lineTo(rect.width - padding, y)
+            ctx.stroke()
+        }
+        
+        ctx.setLineDash([])
     }
 
     useEffect(() => {
         drawArray()
     }, [array, actions, currentStep])
 
+    // Handle window resize
+    useEffect(() => {
+        const handleResize = () => {
+            setTimeout(drawArray, 100) // Small delay to ensure proper sizing
+        }
+        
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [array, actions, currentStep])
+
     return (
-        <canvas
-            ref={canvasRef}
-            width={800}
-            height={600}
-            style={{ border: '1px solid #000', backgroundColor: '#f0f0f0' }}
-        />
+        <div className="canvas-wrapper">
+            <canvas 
+                ref={canvasRef}
+                className="visualization-canvas"
+            />
+            <style jsx>{`
+                .canvas-wrapper {
+                    width: 100%;
+                    height: 400px;
+                    position: relative;
+                    border-radius: var(--radius);
+                    overflow: hidden;
+                    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+                    border: 1px solid var(--border-primary);
+                }
+                
+                .visualization-canvas {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    cursor: default;
+                }
+                
+                @media (max-width: 768px) {
+                    .canvas-wrapper {
+                        height: 300px;
+                    }
+                }
+            `}</style>
+        </div>
      )
 }
