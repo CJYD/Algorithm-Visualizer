@@ -1,4 +1,4 @@
-def generate_actions(array):
+def generate_actions(array, sort_direction="asc"):
     # Generate actions for the bubble sort algorithm
     actions = []
     arr = array.copy()
@@ -14,7 +14,10 @@ def generate_actions(array):
             })
 
             # If element is in wrong order, swap them
-            if arr[j] > arr[j + 1]:
+            should_swap = (sort_direction == "asc" and arr[j] > arr[j + 1]) or \
+                         (sort_direction == "desc" and arr[j] < arr[j + 1])
+            
+            if should_swap:
                 # Swap elements
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]
 
