@@ -1,270 +1,197 @@
 # Algorithm Visualizer
 
-<div align="center">
-
 **Interactive Sorting Algorithm Visualization Platform**
 
 An educational tool that brings sorting algorithms to life through stunning real-time visualizations. Watch algorithms work step-by-step, compare their behaviors, and gain deeper insights into how different sorting techniques operate.
 
-[![Status](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/yourusername/algorithm-visualizer)
+[![Status](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/CJYD/algorithm-visualizer)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js-black)](https://nextjs.org/)
 [![Python](https://img.shields.io/badge/Backend-Python-blue)](https://python.org/)
 [![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue)](https://typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-</div>
+## Overview
 
----
+Algorithm Visualizer is an interactive web application designed to help students, educators, and developers understand sorting algorithms through dynamic visual representations. Built with modern web technologies, it combines the power of Next.js for the frontend and Python for the backend to deliver smooth, real-time animations of sorting processes.
 
-## ✨ Features
+## Key Features
 
-### Core Functionality
 - **Real-time Visual Rendering** - High-performance HTML5 Canvas visualization with smooth animations
 - **Interactive Playback Controls** - Play, pause, reset, and step through algorithms at your own pace
+- **Multiple Sorting Algorithms** - Compare 5 different sorting algorithms side-by-side
 - **Dynamic Configuration** - Adjust array size (5-100 elements), animation speed (10-1000ms), and sort direction
-- **Multi-Algorithm Support** - Compare 5 different sorting algorithms side-by-side
+- **Color-Coded Actions** - Visual feedback for comparisons, swaps, and merges
+- **Responsive Design** - Optimized for desktop and mobile devices
 
-### Supported Algorithms
-- **Bubble Sort** - Compare adjacent elements and swap if needed
-- **Selection Sort** - Find minimum/maximum and place in correct position  
-- **Insertion Sort** - Build sorted array one element at a time
-- **Quick Sort** - Divide-and-conquer with pivot-based partitioning
-- **Merge Sort** - Recursive divide-and-conquer with merging
+## Supported Algorithms
 
-### Visual Elements
-- **Color-Coded Actions**
-  - **Blue** - Normal elements (default state)
-  - **Red** - Elements being compared
-  - **Orange** - Elements being swapped
-  - **Purple** - Elements being merged/set
-- **Responsive Bars** - Height represents element values with consistent scaling
-- **Modern Dark Theme** - GitHub-inspired design with smooth gradients
-- **Mobile Responsive** - Optimized for all screen sizes
+### Currently Implemented
+- **Bubble Sort** - O(n²) time complexity, compare and swap adjacent elements
+- **Selection Sort** - O(n²) time complexity, select minimum and place in position
+- **Insertion Sort** - O(n²) average case, build sorted array incrementally
+- **Quick Sort** - O(n log n) average case, divide-and-conquer with pivot
+- **Merge Sort** - O(n log n) guaranteed, recursive divide and merge
 
-### User Experience
-- **Real-time Status Display** - Track algorithm progress, current step, and playback status
-- **Random Array Generation** - Generate new test cases with single click
-- **Flexible Playback** - Resume from any point, replay completed animations
-- **Bidirectional Sorting** - Sort ascending or descending
+## Technical Stack
 
----
+### Frontend
+- **Next.js 13+** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **HTML5 Canvas** - Hardware-accelerated graphics
+- **Tailwind CSS** - Modern styling
 
-## 🚀 How It Works
+### Backend
+- **Python 3.7+** - Algorithm implementations
+- **FastAPI/Flask** - RESTful API endpoints
+- **NumPy** - Efficient array operations
 
-### Architecture Overview
-The Algorithm Visualizer uses a **hybrid architecture** combining the best of both frontend and backend processing:
+## Installation
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Next.js UI    │ ── │   API Routes    │ ── │  Python Engine  │
-│                 │    │                 │    │                 │
-│ • Canvas Render │    │ • Request Proxy │    │ • Array Generate│
-│ • User Controls │    │ • Data Transform│    │ • Action Record │
-│ • State Manage  │    │ • Error Handle  │    │ • Algorithm Exec│
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+### Prerequisites
+- Node.js 18+ and npm
+- Python 3.7+
+- Git
+
+### Quick Start
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/CJYD/algorithm-visualizer.git
+cd algorithm-visualizer
 ```
 
-### Frontend (React/Next.js)
-- **Canvas Component** - High-performance rendering with device pixel ratio optimization
-- **Control Panel** - Intuitive interface for algorithm selection and playback control
-- **State Management** - Real-time synchronization of visualization state
-- **Animation Engine** - Smooth step-by-step animation with configurable timing
+2. **Install frontend dependencies**
+```bash
+npm install
+```
 
-### Backend (Python)
-- **Algorithm Implementations** - Pure Python sorting algorithms with action recording
-- **Action Generation** - Detailed step-by-step action logs (compare, swap, set operations)
-- **Array Generation** - Random array creation with configurable size and constraints
-- **API Integration** - RESTful endpoints for algorithm execution and data retrieval
+3. **Install backend dependencies**
+```bash
+cd backend
+pip install -r requirements.txt
+cd ..
+```
+
+4. **Run the development server**
+```bash
+# Terminal 1 - Frontend
+npm run dev
+
+# Terminal 2 - Backend
+cd backend
+python app.py
+```
+
+5. **Open your browser**
+Navigate to `http://localhost:3000`
+
+## Project Structure
+
+```
+algorithm-visualizer/
+├── app/                    # Next.js app directory
+│   ├── components/        # React components
+│   ├── api/              # API routes
+│   └── page.tsx          # Main page
+├── backend/               # Python backend
+│   ├── algorithms/       # Sorting implementations
+│   ├── utils/           # Utility functions
+│   └── app.py           # Main server
+├── public/               # Static assets
+├── styles/              # Global styles
+└── package.json         # Dependencies
+```
+
+## How It Works
+
+### Architecture
+The application uses a hybrid architecture:
+
+1. **User Interface** - React components handle user interactions and state management
+2. **API Layer** - Next.js API routes proxy requests to the Python backend
+3. **Algorithm Engine** - Python processes sorting algorithms and records actions
+4. **Visualization** - Canvas renders animations based on recorded actions
 
 ### Data Flow
-1. **User Selection** → Frontend captures algorithm choice and parameters
-2. **API Request** → Next.js API route forwards request to Python backend  
-3. **Algorithm Execution** → Python generates random array and records all sorting actions
-4. **Data Response** → Backend returns initial array and complete action sequence
-5. **Visualization** → Frontend animates through actions with user-controlled timing
+1. User selects algorithm and parameters
+2. Frontend requests sorting data from backend
+3. Python generates array and executes algorithm
+4. Backend returns initial array and action sequence
+5. Frontend animates through actions step-by-step
 
----
+## Usage Guide
 
-## 🎮 User Guide
+### Basic Operation
+1. Select a sorting algorithm from the dropdown
+2. Adjust array size and animation speed as desired
+3. Click "Play" to start visualization
+4. Use playback controls to pause, reset, or generate new arrays
 
-### Getting Started
-1. **Select Algorithm** - Choose from dropdown menu (Bubble, Selection, Insertion, Quick, Merge)
-2. **Configure Settings** - Set array size (5-100), animation speed (10-1000ms), sort direction
-3. **Generate Array** - App automatically creates random array for visualization
-4. **Start Animation** - Click Play to begin step-by-step visualization
+### Visual Indicators
+- **Blue** - Normal elements
+- **Red** - Elements being compared
+- **Orange** - Elements being swapped
+- **Purple** - Elements being merged/set
 
-### Playback Controls
-- **▶ Play** - Start/resume animation from current position
-- **⏸ Pause** - Pause animation at current step (can resume later)
-- **⏹ Reset** - Return to initial array state (step 0)
-- **🎲 New Array** - Generate fresh random array with same settings
-
-### Customization Options
-- **Array Size Slider** - Control number of elements (affects complexity and visual density)
-- **Speed Slider** - Adjust animation timing (faster = harder to follow, slower = easier analysis)
-- **Sort Direction** - Toggle between ascending ↑ and descending ↓ sort orders
-- **Real-time Changes** - Most settings apply immediately (except during active animation)
-
-### Visual Interpretation
-- **Bar Height** = Element value (taller = larger number)
-- **Bar Colors** = Current operation type (compare/swap/merge)
-- **Animation Flow** = Algorithm's decision-making process in real-time
-- **Step Counter** = Progress through total algorithm operations
-
----
-
-## 🧠 Educational Value
+## Educational Value
 
 ### Learning Objectives
-- **Visual Understanding** - See abstract concepts become concrete through animation
-- **Time Complexity** - Observe performance differences between O(n²) and O(n log n) algorithms
-- **Algorithm Mechanics** - Understand the step-by-step decision process of each sorting method
-- **Comparative Analysis** - Experience how different algorithms handle the same data
+- Understand algorithm mechanics through visualization
+- Compare time complexity in practice
+- Observe algorithm behavior patterns
+- Analyze performance characteristics
 
-### Algorithm Insights
+### Use Cases
+- Computer Science education
+- Technical interview preparation
+- Algorithm research and analysis
+- Code documentation and debugging
 
-#### **Bubble Sort** - *O(n²) Time, O(1) Space*
-- **Behavior**: Repeatedly steps through list, compares adjacent elements
-- **Observation**: Largest elements "bubble up" to correct position
-- **Best For**: Understanding basic sorting concepts, small datasets
-
-#### **Selection Sort** - *O(n²) Time, O(1) Space*
-- **Behavior**: Finds minimum/maximum element, places in correct position
-- **Observation**: Sorted portion grows from one end
-- **Best For**: Minimizing write operations, small datasets
-
-#### **Insertion Sort** - *O(n²) Average, O(n) Best, O(1) Space*
-- **Behavior**: Builds final sorted array one element at a time
-- **Observation**: Efficient for small datasets and nearly-sorted arrays
-- **Best For**: Online algorithms, small datasets, nearly-sorted data
-
-#### **Quick Sort** - *O(n log n) Average, O(n²) Worst, O(log n) Space*
-- **Behavior**: Divide-and-conquer using pivot-based partitioning
-- **Observation**: Recursive splitting creates efficient sorting
-- **Best For**: General-purpose sorting, large datasets
-
-#### **Merge Sort** - *O(n log n) Time, O(n) Space*
-- **Behavior**: Divide array in half recursively, then merge sorted halves
-- **Observation**: Consistent performance regardless of input
-- **Best For**: Stable sorting, linked lists, guaranteed O(n log n)
-
----
-
-## 🎯 Use Cases
-
-<table>
-  <tr>
-    <th>🎓 Educational</th>
-    <th>👨‍💻 Development</th>
-    <th>📊 Research & Analysis</th>
-  </tr>
-  <tr>
-    <td>
-      • Computer Science Courses<br>
-      • Coding Bootcamps<br>
-      • Self-Study<br>
-      • Interview Prep
-    </td>
-    <td>
-      • Algorithm Prototyping<br>
-      • Performance Analysis<br>
-      • Debugging Aid<br>
-      • Code Documentation
-    </td>
-    <td>
-      • Algorithm Comparison<br>
-      • Data Pattern Testing<br>
-      • Optimization Research<br>
-      • Educational Research
-    </td>
-  </tr>
-</table>
-
----
-
-## 🛠️ Technical Highlights
-
-### Performance Optimizations
-- **Canvas Rendering** - Hardware-accelerated graphics with device pixel ratio support
-- **Efficient State Management** - Minimal re-renders through React optimization
-- **Memory Management** - Optimal array copying and garbage collection
-- **Responsive Design** - Smooth performance across all device sizes
-
-### Code Quality Features
-- **TypeScript** - Full type safety across frontend components
-- **Error Handling** - Comprehensive error boundaries and validation
-- **Clean Architecture** - Separation of concerns between visualization and logic
-- **Modular Design** - Extensible structure for adding new algorithms
-
-### Browser Compatibility
-- **Modern Browsers** - Chrome, Firefox, Safari, Edge (latest versions)
-- **Canvas API** - HTML5 Canvas with fallback handling
-- **Responsive Web Design** - CSS Grid and Flexbox for optimal layouts
-- **Progressive Enhancement** - Core functionality works even with limited features
-
----
-
-## 📈 Future Enhancements
+## Future Enhancements
 
 ### Planned Features
-- **More Algorithms** - Heap Sort, Radix Sort, Counting Sort, Bucket Sort
-- **Performance Metrics** - Real-time comparisons count, swap count, time elapsed
-- **Theme Customization** - Light mode, high contrast, color-blind friendly options
-- **Touch Controls** - Mobile-optimized gesture controls for playback
-- **Audio Feedback** - Optional sound effects for comparisons and swaps
-- **Session Persistence** - Save and resume visualization sessions
+- Additional algorithms (Heap Sort, Radix Sort, etc.)
+- Performance metrics dashboard
+- Side-by-side algorithm comparison
+- Custom input arrays
+- Export animations as GIF/video
+- Dark/light theme toggle
 
-### Advanced Capabilities
-- **Custom Input** - User-provided arrays for testing specific scenarios
-- **Algorithm Racing** - Side-by-side comparison of multiple algorithms
-- **Educational Mode** - Step-by-step explanations and complexity analysis
-- **Statistical Analysis** - Performance metrics and complexity visualization
-- **Interactive Challenges** - Gamified learning with sorting puzzles
+### Technical Improvements
+- WebAssembly for performance
+- Real-time collaboration features
+- Algorithm complexity analysis
+- Mobile touch gestures
+- Accessibility enhancements
 
----
+## Contributing
 
-## 📚 Documentation
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-For detailed technical information, see our comprehensive documentation:
+### Development Setup
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-- **[SETUP.md](./SETUP.md)** - Installation and setup instructions
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Technical architecture and design decisions
-- **[API.md](./API.md)** - API documentation and endpoints
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guides and configuration
+## Documentation
 
----
+- [Setup Guide](./docs/SETUP.md) - Detailed installation instructions
+- [API Documentation](./docs/API.md) - Backend API reference
+- [Architecture](./docs/ARCHITECTURE.md) - Technical design details
 
-## 🤝 Contributing
-
-We welcome contributions to make Algorithm Visualizer even better! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
-
-### How to Contribute
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
-### Development Guidelines
-- Follow existing code style and conventions
-- Add tests for new features
-- Update documentation as needed
-- Ensure all tests pass before submitting
-
----
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Acknowledgments
+
+- Inspired by various algorithm visualization tools
+- Built with modern web technologies
+- Designed for educational purposes
+
 ---
 
-<div align="center">
+**Built for the developer community**
 
-**Built for algorithm education and visualization**
-
-*Making computer science concepts accessible through interactive learning*
-
-[⭐ Star this repo](https://github.com/yourusername/algorithm-visualizer) • [🐛 Report Bug](https://github.com/yourusername/algorithm-visualizer/issues) • [💡 Request Feature](https://github.com/yourusername/algorithm-visualizer/issues)
-
-</div>
+[Star this repo](https://github.com/CJYD/algorithm-visualizer) • [Report Bug](https://github.com/CJYD/algorithm-visualizer/issues) • [Request Feature](https://github.com/CJYD/algorithm-visualizer/issues)
