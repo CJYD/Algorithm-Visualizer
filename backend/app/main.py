@@ -1,4 +1,5 @@
 # Library imports
+import os
 import random
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -12,10 +13,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# Configure CORS origins
+# In production, use specific origins; in development, allow localhost
+cors_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:3000,https://algorithm-visualizer-web.onrender.com"
+).split(",")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

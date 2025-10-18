@@ -10,6 +10,8 @@ services:
         value: 3.9.18
       - key: PYTHONPATH
         value: /opt/render/project/src/backend
+      - key: CORS_ORIGINS
+        value: http://localhost:3000,https://algorithm-visualizer-web.onrender.com
     healthCheckPath: /docs
     plan: free
 
@@ -23,6 +25,6 @@ services:
       - key: NODE_VERSION
         value: 18
       - key: PYTHON_BACKEND_URL
-        sync: false
+        value: https://algorithm-visualizer-api-aa5n.onrender.com
     healthCheckPath: /
     plan: free
