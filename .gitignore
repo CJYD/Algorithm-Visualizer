@@ -32,7 +32,6 @@ pip-delete-this-directory.txt
 # IDE
 .vscode/
 .idea/
-.claude/
 *.swp
 *.swo
 
