@@ -46,4 +46,4 @@ logs/
 # Runtime
 *.pid
 *.seed
-*.pid.lock
+*.pid.lock.env.example
